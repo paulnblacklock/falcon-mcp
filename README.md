@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server for CrowdStrike Falcon that provides AI as
 falcon-mcp/
 ├── src/                      # Source code
 │   ├── server.py             # Server implementation and entry point
-│   ├── auth.py               # Authentication handling
+│   ├── client.py             # Falcon API client and authentication
 │   ├── common/               # Common utilities
 │   │   ├── config.py         # Configuration
 │   │   ├── errors.py         # Error handling
