@@ -2,6 +2,12 @@ name: Manual E2E Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      models:
+        description: 'Models to test'
+        required: false
+        default: 'gpt-4.1-mini,gpt-4o-mini'
+        type: string
 
 jobs:
   test:
@@ -21,5 +27,20 @@ jobs:
         pip install -e ".[dev]"
 
     - name: Test with pytest
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        MODELS_TO_TEST: ${{ inputs.models }}
       run: |
         pytest --run-e2e
+
+    - name: Generate HTML report
+      if: always()
+      run: |
+        python scripts/generate_e2e_report.py
+
+    - name: Upload HTML report artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-test-report
+        path: ./static_test_report.html
