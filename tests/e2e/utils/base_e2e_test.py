@@ -4,6 +4,7 @@ import asyncio
 import os
 import threading
 import time
+from typing import Any
 import unittest
 from unittest.mock import MagicMock, patch
 import json
@@ -163,6 +164,15 @@ class SharedTestServer:
 
 # Global singleton instance
 _shared_server = SharedTestServer()
+
+
+def ensure_dict(data: Any) -> dict:
+    """
+    Return input if it is a dict, otherwise, attempt to convert it to a dict using json.loads
+    """
+    if isinstance(data, dict):
+        return data
+    return json.loads(data)
 
 
 class BaseE2ETest(unittest.TestCase):
