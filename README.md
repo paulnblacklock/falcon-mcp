@@ -275,6 +275,7 @@ Provides tools for accessing and analyzing CrowdStrike Falcon incidents:
 Provides tools for accessing and analyzing CrowdStrike Intel:
 
 - `falcon_search_actors`: Get info about actors
+- `falcon_search_actors_fql_filter_guide`: Get FQL rules for falcon_search_actors tool filter param
 - `falcon_search_indicators`: Get info about indicators
 - `falcon_search_reports`: Get info about reports
 
@@ -335,6 +336,7 @@ To use the Falcon MCP server with AI assistants, you can use the provided `examp
 ## Documentation
 
 - [Module Development Guide](docs/module_development.md): Instructions for implementing new modules
+- [Resource Development Guide](docs/resource_development.md): Instructions for implementing resources
 - [Architecture Decisions](docs/architecture_decisions.md): Key architectural decisions and their rationale
 - [End-to-End Testing Guide](docs/e2e_testing.md): Guide for running and understanding E2E tests
 
