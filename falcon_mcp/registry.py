@@ -8,7 +8,7 @@ import os
 import pkgutil
 from typing import Dict, Type, List
 
-from .common.logging import get_logger
+from falcon_mcp.common.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,7 +31,7 @@ def discover_modules():
     for _, name, is_pkg in pkgutil.iter_modules([modules_path]):
         if not is_pkg and name != 'base':  # Skip base.py and packages
             # Import the module
-            module = importlib.import_module(f'src.modules.{name}')
+            module = importlib.import_module(f'falcon_mcp.modules.{name}')
 
             # Look for *Module classes
             for attr_name in dir(module):
