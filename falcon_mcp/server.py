@@ -32,7 +32,7 @@ class FalconMCPServer:
         """Initialize the Falcon MCP server.
 
         Args:
-            base_url: Falcon API base URL (defaults to FALCON_BASE_URL env var)
+            base_url: Falcon API base URL
             debug: Enable debug logging
             enabled_modules: Set of module names to enable (defaults to all modules)
         """
@@ -169,6 +169,39 @@ class FalconMCPServer:
             self.server.run(transport)
 
 
+def parse_modules_list(modules_string):
+    """Parse and validate comma-separated module list.
+
+    Args:
+        modules_string: Comma-separated string of module names
+
+    Returns:
+        List of validated module names (returns all available modules if empty string)
+
+    Raises:
+        argparse.ArgumentTypeError: If any module names are invalid
+    """
+    # Get available modules
+    available_modules = registry.get_module_names()
+
+    # If empty string, return all available modules (default behavior)
+    if not modules_string:
+        return available_modules
+
+    # Split by comma and clean up whitespace
+    modules = [m.strip() for m in modules_string.split(',') if m.strip()]
+
+    # Validate against available modules
+    invalid_modules = [m for m in modules if m not in available_modules]
+    if invalid_modules:
+        raise argparse.ArgumentTypeError(
+            f"Invalid modules: {', '.join(invalid_modules)}. "
+            f"Available modules: {', '.join(available_modules)}"
+        )
+
+    return modules
+
+
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Falcon MCP Server")
@@ -177,46 +210,49 @@ def parse_args():
     parser.add_argument(
         "--transport", "-t",
         choices=["stdio", "sse", "streamable-http"],
-        default="stdio",
-        help="Transport protocol to use (default: stdio)"
+        default=os.environ.get('FALCON_MCP_TRANSPORT', 'stdio'),
+        help="Transport protocol to use (default: stdio, env: FALCON_MCP_TRANSPORT)"
     )
 
     # Module selection
     available_modules = registry.get_module_names()
+
     parser.add_argument(
         "--modules", "-m",
-        nargs="+",
-        choices=available_modules,
-        default=available_modules,
-        metavar="MODULE",
-        help=f"Modules to enable. Available: {', '.join(available_modules)} (default: {','.join(available_modules)})"
+        type=parse_modules_list,
+        default=parse_modules_list(os.environ.get('FALCON_MCP_MODULES', '')),
+        metavar="MODULE1,MODULE2,...",
+        help=f"Comma-separated list of modules to enable. Available: [{', '.join(available_modules)}] "
+             f"(default: all modules, env: FALCON_MCP_MODULES)"
     )
 
     # Debug mode
     parser.add_argument(
         "--debug", "-d",
         action="store_true",
-        help="Enable debug logging"
+        default=os.environ.get("FALCON_MCP_DEBUG", "").lower() == "true",
+        help="Enable debug logging (env: FALCON_MCP_DEBUG)"
     )
 
     # API base URL
     parser.add_argument(
         "--base-url",
-        help="Falcon API base URL (defaults to FALCON_BASE_URL env var)"
+        default=os.environ.get('FALCON_BASE_URL'),
+        help="Falcon API base URL (env: FALCON_BASE_URL)"
     )
 
     # HTTP transport configuration
     parser.add_argument(
         "--host",
-        default="127.0.0.1",
-        help="Host to bind to for HTTP transports (default: 127.0.0.1)"
+        default=os.environ.get('FALCON_MCP_HOST', '127.0.0.1'),
+        help="Host to bind to for HTTP transports (default: 127.0.0.1, env: FALCON_MCP_HOST)"
     )
 
     parser.add_argument(
         "--port", "-p",
         type=int,
-        default=8000,
-        help="Port to listen on for HTTP transports (default: 8000)"
+        default=int(os.environ.get('FALCON_MCP_PORT', '8000')),
+        help="Port to listen on for HTTP transports (default: 8000, env: FALCON_MCP_PORT)"
     )
 
 
@@ -228,17 +264,14 @@ def main():
     # Load environment variables
     load_dotenv()
 
-    # Parse command line arguments
+    # Parse command line arguments (includes environment variable defaults)
     args = parse_args()
-
-    # Get debug setting
-    debug = args.debug or os.environ.get("DEBUG", "").lower() == "true"
 
     try:
         # Create and run the server
         server = FalconMCPServer(
             base_url=args.base_url,
-            debug=debug,
+            debug=args.debug,
             enabled_modules=set(args.modules)
         )
         logger.info("Starting server with %s transport", args.transport)
