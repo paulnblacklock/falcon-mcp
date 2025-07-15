@@ -19,6 +19,7 @@
   - [Intel Module](#intel-module)
   - [Hosts Module](#hosts-module)
   - [Spotlight Module](#spotlight-module)
+  - [Cloud Module](#cloud-module)
   - [IDP Module](#idp-module)
 - [Installation \& Setup](#installation--setup)
   - [Prerequisites](#prerequisites)
@@ -33,6 +34,7 @@
 - [Docker Usage](#docker-usage)
 - [Editor/Assitant Integration](#editorassitant-integration)
 - [Additional Deployment Options](#additional-deployment-options)
+  - [Amazon Bedrock AgentCore](#amazon-bedrock-agentcore)
 - [Contributing](#contributing)
   - [Getting Started for Contributors](#getting-started-for-contributors)
   - [Running Tests](#running-tests)
@@ -171,6 +173,25 @@ Provides tools for accessing and managing CrowdStrike Spotlight vulnerabilities:
 
 **Use Cases**: Vulnerability management, security assessments, compliance reporting, risk analysis, patch prioritization
 
+### Cloud Module
+
+**API Scopes Required**:
+
+- `Falcon Container Image:read`
+
+Provides tools for accessing and analyzing CrowdStrike Cloud resources:
+
+- `falcon_search_kubernetes_containers`: Search for containers from CrowdStrike Kubernetes & Containers inventory
+- `falcon_count_kubernetes_containers`: Count for containers by filter criteria from CrowdStrike Kubernetes & Containers inventory
+- `falcon_search_images_vulnerabilities`: Search for images vulnerabilities from CrowdStrike Image Assessments
+
+**Resources**:
+
+- `falcon://cloud/kubernetes-containers/fql-guide`: Comprehensive FQL documentation and examples for kubernetes containers searches
+- `falcon://cloud/images-vulnerabilities/fql-guide`: Comprehensive FQL documentation and examples for images vulnerabilities searches
+
+**Use Cases**: Manage kubernetes containers inventory, container images vulnerabilities analysis
+
 ### IDP Module
 
 **API Scopes Required**: `Identity Protection GraphQL:read`
@@ -205,25 +226,6 @@ Provides tools for accessing and managing CrowdStrike Falcon Identity Protection
 
    pip install -e .
    ```
-
-### Cloud Module
-
-**API Scopes Required**:
-
-- `Falcon Container Image:read`
-
-Provides tools for accessing and analyzing CrowdStrike Cloud resources:
-
-- `falcon_search_kubernetes_containers`: Search for containers from CrowdStrike Kubernetes & Containers inventory
-- `falcon_count_kubernetes_containers`: Count for containers by filter criteria from CrowdStrike Kubernetes & Containers inventory
-- `falcon_search_images_vulnerabilities`: Search for images vulnerabilities from CrowdStrike Image Assessments
-
-**Resources**:
-
-- `falcon://cloud/kubernetes-containers/fql-guide`: Comprehensive FQL documentation and examples for kubernetes containers searches
-- `falcon://cloud/images-vulnerabilities/fql-guide`: Comprehensive FQL documentation and examples for images vulnerabilities searches
-
-**Use Cases**: Manage kubernetes containers inventory, container images vulnerabilities analysis
 
 ### Environment Configuration
 
