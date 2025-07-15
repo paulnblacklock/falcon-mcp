@@ -242,9 +242,7 @@ class BaseE2ETest(unittest.TestCase):
                 result += str(data["chunk"].content)
         return tools, result
 
-    def run_test_with_retries(
-        self, test_name: str, test_logic_coro: callable, assertion_logic: callable
-    ):
+    def run_test_with_retries(self, test_name: str, test_logic_coro: callable, assertion_logic: callable): # fmt: skip
         """
         Run a given test logic multiple times against different models and check for a success threshold.
 
@@ -299,7 +297,7 @@ class BaseE2ETest(unittest.TestCase):
         model_success_count = 0
 
         for i in range(RUNS_PER_TEST):
-            print(f"Running test {test_name} with model {model_name}, try {i+1}/{RUNS_PER_TEST}")
+            print(f"Running test {test_name} with model {model_name}, try {i + 1}/{RUNS_PER_TEST}")
             run_result = {
                 "test_name": test_name,
                 "module_name": module_name,
@@ -327,11 +325,12 @@ class BaseE2ETest(unittest.TestCase):
                 model_success_count += 1
             except AssertionError as e:
                 run_result["failure_reason"] = f"Assertion failed: {str(e)}"
-                print(f"Assertion failed with model {model_name}, try {i+1}: {e}")
+                print(f"Assertion failed with model {model_name}, try {i + 1}: {e}")
             except Exception as e:  # pylint: disable=broad-exception-caught
                 # Catch any other exception that might occur during agent streaming or test execution
+                # fmt: off
                 run_result["failure_reason"] = f"Test execution failed: {type(e).__name__}: {str(e)}"
-                print(f"Test execution failed with model {model_name}, try {i+1}: {type(e).__name__}: {e}")
+                print(f"Test execution failed with model {model_name}, try {i + 1}: {type(e).__name__}: {e}")
             finally:
                 self.test_results.append(run_result)
 
@@ -344,7 +343,7 @@ class BaseE2ETest(unittest.TestCase):
         self.assertGreaterEqual(
             success_rate,
             SUCCESS_THRESHOLD,
-            f"Success rate of {success_rate*100:.2f}% is below the required {SUCCESS_THRESHOLD*100:.2f}% threshold.",
+            f"Success rate of {success_rate * 100:.2f}% is below the required {SUCCESS_THRESHOLD * 100:.2f}% threshold.",
         )
 
     def _get_module_name(self) -> str:
