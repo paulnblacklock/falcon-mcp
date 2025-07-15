@@ -1,6 +1,11 @@
-# Falcon MCP Server
+![CrowdStrike Falcon](https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png)
 
-Bridge the gap between AI assistants and CrowdStrike Falcon, enabling intelligent security automation and analysis within your agentic workflows.
+# falcon-mcp
+
+**falcon-mcp** is a Model Context Protocol (MCP) server that connects AI agents with the CrowdStrike Falcon platform, powering intelligent security analysis in your agentic workflows. It delivers programmatic access to essential security capabilities—including detections, incidents, and behaviors—establishing the foundation for advanced security operations and automation.
+
+> [!IMPORTANT]
+> **🚧 Public Preview**: This project is currently in public preview and under active development. Features and functionality may change before the stable 1.0 release. While we encourage exploration and testing, please avoid production deployments. We welcome your feedback through [GitHub Issues](https://github.com/crowdstrike/falcon-mcp/issues) to help shape the final release.
 
 ## Table of Contents
 
@@ -26,6 +31,7 @@ Bridge the gap between AI assistants and CrowdStrike Falcon, enabling intelligen
   - [Running Examples](#running-examples)
 - [Docker Usage](#docker-usage)
 - [Editor/Assitant Integration](#editorassitant-integration)
+- [Additional Deployment Options](#additional-deployment-options)
 - [Contributing](#contributing)
   - [Getting Started for Contributors](#getting-started-for-contributors)
   - [Running Tests](#running-tests)
@@ -416,6 +422,12 @@ You can integrate the Falcon MCP server with your editor or AI assistant in a fe
   ]
 }
 ```
+
+## Additional Deployment Options
+
+### Amazon Bedrock AgentCore
+
+To deploy the MCP Server as a tool in Amazon Bedrock AgentCore, please refer to the [following document](./docs/deployment/amazon_bedrock_agentcore.md).
 
 ## Contributing
 
