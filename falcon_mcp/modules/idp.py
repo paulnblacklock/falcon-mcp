@@ -15,6 +15,7 @@ from pydantic import Field
 
 from falcon_mcp.common.logging import get_logger
 from falcon_mcp.common.errors import handle_api_response
+from falcon_mcp.common.utils import sanitize_input
 from falcon_mcp.modules.base import BaseModule
 
 logger = get_logger(__name__)
@@ -41,68 +42,72 @@ class IdpModule(BaseModule):
     # ==========================================
 
     def investigate_entity(
-            self,
-            # Entity Identification (Required - at least one)
-            entity_ids: Optional[List[str]] = Field(
-                default=None,
-                description="List of specific entity IDs to investigate (e.g., ['entity-001'])"
-            ),
-            entity_names: Optional[List[str]] = Field(
-                default=None,
-                description="List of entity names to search for (e.g., ['John Doe'])"
-            ),
-            email_addresses: Optional[List[str]] = Field(
-                default=None,
-                description="List of email addresses to investigate (e.g., ['user@example.com'])"
-            ),
-            ip_addresses: Optional[List[str]] = Field(
-                default=None,
-                description="List of IP addresses/endpoints to investigate (e.g., ['1.1.1.1'])"
-            ),
+        self,
+        # Entity Identification (Required - at least one)
+        entity_ids: Optional[List[str]] = Field(
+            default=None,
+            description="List of specific entity IDs to investigate (e.g., ['entity-001'])"
+        ),
+        entity_names: Optional[List[str]] = Field(
+            default=None,
+            description="List of entity names to search for (e.g., ['Administrator', 'John Doe']). When combined with other parameters, uses AND logic."
+        ),
+        email_addresses: Optional[List[str]] = Field(
+            default=None,
+            description="List of email addresses to investigate (e.g., ['user@example.com']). When combined with other parameters, uses AND logic."
+        ),
+        ip_addresses: Optional[List[str]] = Field(
+            default=None,
+            description="List of IP addresses/endpoints to investigate (e.g., ['1.1.1.1']). When combined with other parameters, uses AND logic."
+        ),
+        domain_names: Optional[List[str]] = Field(
+            default=None,
+            description="List of domain names to search for (e.g., ['XDRHOLDINGS.COM', 'CORP.LOCAL']). When combined with other parameters, uses AND logic. Example: entity_names=['Administrator'] + domain_names=['DOMAIN.COM'] finds Administrator user in that specific domain."
+        ),
 
-            # Investigation Scope Control
-            investigation_types: Optional[List[str]] = Field(
-                default=["entity_details"],
-                description="Types of investigation to perform: 'entity_details', 'timeline_analysis', 'relationship_analysis', 'risk_assessment'. Use multiple for comprehensive analysis."
-            ),
+        # Investigation Scope Control
+        investigation_types: Optional[List[str]] = Field(
+            default=["entity_details"],
+            description="Types of investigation to perform: 'entity_details', 'timeline_analysis', 'relationship_analysis', 'risk_assessment'. Use multiple for comprehensive analysis."
+        ),
 
-            # Timeline Parameters (when timeline_analysis is included)
-            timeline_start_time: Optional[str] = Field(
-                default=None,
-                description="Start time for timeline analysis in ISO format (e.g., '2024-01-01T00:00:00Z')"
-            ),
-            timeline_end_time: Optional[str] = Field(
-                default=None,
-                description="End time for timeline analysis in ISO format"
-            ),
-            timeline_event_types: Optional[List[str]] = Field(
-                default=None,
-                description="Filter timeline by event types: 'ACTIVITY', 'NOTIFICATION', 'THREAT', 'ENTITY', 'AUDIT', 'POLICY', 'SYSTEM'"
-            ),
+        # Timeline Parameters (when timeline_analysis is included)
+        timeline_start_time: Optional[str] = Field(
+            default=None,
+            description="Start time for timeline analysis in ISO format (e.g., '2024-01-01T00:00:00Z')"
+        ),
+        timeline_end_time: Optional[str] = Field(
+            default=None,
+            description="End time for timeline analysis in ISO format"
+        ),
+        timeline_event_types: Optional[List[str]] = Field(
+            default=None,
+            description="Filter timeline by event types: 'ACTIVITY', 'NOTIFICATION', 'THREAT', 'ENTITY', 'AUDIT', 'POLICY', 'SYSTEM'"
+        ),
 
-            # Relationship Parameters (when relationship_analysis is included)
-            relationship_depth: Optional[int] = Field(
-                default=2, ge=1, le=3,
-                description="Depth of relationship analysis (1-3 levels)"
-            ),
+        # Relationship Parameters (when relationship_analysis is included)
+        relationship_depth: Optional[int] = Field(
+            default=2, ge=1, le=3,
+            description="Depth of relationship analysis (1-3 levels)"
+        ),
 
-            # General Parameters
-            limit: Optional[int] = Field(
-                default=50, ge=1, le=200,
-                description="Maximum number of results to return"
-            ),
-            include_associations: Optional[bool] = Field(
-                default=True,
-                description="Include entity associations and relationships in results"
-            ),
-            include_accounts: Optional[bool] = Field(
-                default=True,
-                description="Include account information in results"
-            ),
-            include_incidents: Optional[bool] = Field(
-                default=True,
-                description="Include open security incidents in results"
-            )
+        # General Parameters
+        limit: Optional[int] = Field(
+            default=50, ge=1, le=200,
+            description="Maximum number of results to return"
+        ),
+        include_associations: Optional[bool] = Field(
+            default=True,
+            description="Include entity associations and relationships in results"
+        ),
+        include_accounts: Optional[bool] = Field(
+            default=True,
+            description="Include account information in results"
+        ),
+        include_incidents: Optional[bool] = Field(
+            default=True,
+            description="Include open security incidents in results"
+        )
     ) -> Dict[str, Any]:
         """Comprehensive entity investigation tool.
 
@@ -116,7 +121,7 @@ class IdpModule(BaseModule):
 
         # Step 1: Validate inputs
         validation_error = self._validate_entity_identifiers(
-            entity_ids, entity_names, email_addresses, ip_addresses, investigation_types
+            entity_ids, entity_names, email_addresses, ip_addresses, domain_names, investigation_types
         )
         if validation_error:
             return validation_error
@@ -127,7 +132,8 @@ class IdpModule(BaseModule):
             "entity_ids": entity_ids,
             "entity_names": entity_names,
             "email_addresses": email_addresses,
-            "ip_addresses": ip_addresses
+            "ip_addresses": ip_addresses,
+            "domain_names": domain_names
         }
 
         resolved_entity_ids = self._resolve_entities({
@@ -135,6 +141,7 @@ class IdpModule(BaseModule):
             "entity_names": entity_names if entity_names is not None else None,
             "email_addresses": email_addresses if email_addresses is not None else None,
             "ip_addresses": ip_addresses if ip_addresses is not None else None,
+            "domain_names": domain_names if domain_names is not None else None,
             "limit": limit
         })
 
@@ -183,11 +190,12 @@ class IdpModule(BaseModule):
     # Investigation Helper Methods
     # ==========================================
 
-    def _validate_entity_identifiers(self, entity_ids, entity_names, email_addresses, ip_addresses, investigation_types):
+    def _validate_entity_identifiers(self, entity_ids, entity_names, email_addresses, ip_addresses, domain_names,
+                                     investigation_types):
         """Validate that at least one entity identifier is provided."""
-        if not any([entity_ids, entity_names, email_addresses, ip_addresses]):
+        if not any([entity_ids, entity_names, email_addresses, ip_addresses, domain_names]):
             return {
-                "error": "At least one entity identifier must be provided (entity_ids, entity_names, email_addresses, or ip_addresses)",
+                "error": "At least one entity identifier must be provided (entity_ids, entity_names, email_addresses, ip_addresses, or domain_names)",
                 "investigation_summary": {
                     "entity_count": 0,
                     "investigation_types": investigation_types,
@@ -248,12 +256,12 @@ class IdpModule(BaseModule):
     # ==========================================
 
     def _build_entity_details_query(
-            self,
-            entity_ids: List[str],
-            include_risk_factors: bool,
-            include_associations: bool,
-            include_incidents: bool,
-            include_accounts: bool
+        self,
+        entity_ids: List[str],
+        include_risk_factors: bool,
+        include_associations: bool,
+        include_incidents: bool,
+        include_accounts: bool
     ) -> str:
         """Build GraphQL query for detailed entity information."""
         entity_ids_json = json.dumps(entity_ids)
@@ -365,12 +373,12 @@ class IdpModule(BaseModule):
         """
 
     def _build_timeline_query(
-            self,
-            entity_id: str,
-            start_time: Optional[str],
-            end_time: Optional[str],
-            event_types: Optional[List[str]],
-            limit: int
+        self,
+        entity_id: str,
+        start_time: Optional[str],
+        end_time: Optional[str],
+        event_types: Optional[List[str]],
+        limit: int
     ) -> str:
         """Build GraphQL query for entity timeline."""
         filters = [f'sourceEntityQuery: {{entityIds: ["{entity_id}"]}}']
@@ -468,11 +476,11 @@ class IdpModule(BaseModule):
         """
 
     def _build_relationship_analysis_query(
-            self,
-            entity_id: str,
-            relationship_depth: int,
-            include_risk_context: bool,
-            limit: int
+        self,
+        entity_id: str,
+        relationship_depth: int,
+        include_risk_context: bool,
+        limit: int
     ) -> str:
         """Build GraphQL query for relationship analysis."""
         risk_fields = ""
@@ -543,9 +551,9 @@ class IdpModule(BaseModule):
         """
 
     def _build_risk_assessment_query(
-            self,
-            entity_ids: List[str],
-            include_risk_factors: bool
+        self,
+        entity_ids: List[str],
+        include_risk_factors: bool
     ) -> str:
         """Build GraphQL query for risk assessment."""
         entity_ids_json = json.dumps(entity_ids)
@@ -575,12 +583,12 @@ class IdpModule(BaseModule):
         }}
         """
 
-    # ==========================================
-    # Helper Methods
-    # ==========================================
-
     def _resolve_entities(self, identifiers: Dict[str, Any]) -> Union[List[str], Dict[str, Any]]:
-        """Resolve entity IDs from various identifier types (names, emails, IPs).
+        """Resolve entity IDs from various identifier types using unified AND-based query.
+
+        All provided identifiers are combined using AND logic in a single GraphQL query.
+        For example: entity_names=["Administrator"] + domain_names=["XDRHOLDINGS.COM"]
+        will find entities that match BOTH criteria.
 
         Returns:
             List[str]: List of resolved entity IDs on success
@@ -593,107 +601,113 @@ class IdpModule(BaseModule):
         if entity_ids and isinstance(entity_ids, list):
             resolved_ids.extend(entity_ids)
 
-        # Resolve entity names to IDs
-        entity_names = identifiers.get("entity_names")
-        if entity_names and isinstance(entity_names, list):
-            for name in entity_names:
-                query = f'''
-                query {{
-                    entities(
-                        primaryDisplayNames: ["{name}"],
-                        first: {identifiers.get("limit", 50)}
-                    ) {{
-                        nodes {{
-                            entityId
-                            primaryDisplayName
-                        }}
-                    }}
-                }}
-                '''
-                response = self.client.command("api_preempt_proxy_post_graphql", body={"query": query})
-                result = handle_api_response(
-                    response,
-                    operation="api_preempt_proxy_post_graphql",
-                    error_message=f"Failed to resolve entity name '{name}'",
-                    default_result=None
-                )
-                if self._is_error(result):
-                    return result
-
-                # Extract entities from GraphQL response structure
-                data = response.get("body", {}).get("data", {})
-                entities = data.get("entities", {}).get("nodes", [])
-                resolved_ids.extend([entity["entityId"] for entity in entities])
-
-        # Resolve email addresses to entity IDs
+        # Check if we have conflicting entity types (USER vs ENDPOINT)
         email_addresses = identifiers.get("email_addresses")
-        if email_addresses and isinstance(email_addresses, list):
-            for email in email_addresses:
-                query = f'''
-                query {{
-                    entities(
-                        types: [USER],
-                        secondaryDisplayNames: ["{email}"],
-                        first: {identifiers.get("limit", 50)}
-                    ) {{
-                        nodes {{
-                            entityId
-                            primaryDisplayName
-                            secondaryDisplayName
-                        }}
-                    }}
-                }}
-                '''
-                response = self.client.command("api_preempt_proxy_post_graphql", body={"query": query})
-                result = handle_api_response(
-                    response,
-                    operation="api_preempt_proxy_post_graphql",
-                    error_message=f"Failed to resolve email address '{email}'",
-                    default_result=None
-                )
-                if self._is_error(result):
-                    return result
-
-                # Extract entities from GraphQL response structure
-                data = response.get("body", {}).get("data", {})
-                entities = data.get("entities", {}).get("nodes", [])
-                resolved_ids.extend([entity["entityId"] for entity in entities])
-
-        # Resolve IP addresses/endpoints to entity IDs
         ip_addresses = identifiers.get("ip_addresses")
-        if ip_addresses and isinstance(ip_addresses, list):
-            for ip in ip_addresses:
-                query = f'''
-                query {{
-                    entities(
-                        types: [ENDPOINT],
-                        primaryDisplayNames: ["{ip}"],
-                        first: {identifiers.get("limit", 50)}
-                    ) {{
-                        nodes {{
-                            entityId
-                            primaryDisplayName
-                        }}
+        has_user_criteria = bool(email_addresses)
+        has_endpoint_criteria = bool(ip_addresses)
+
+        # If we have both USER and ENDPOINT criteria, we need separate queries
+        if has_user_criteria and has_endpoint_criteria:
+            # This is a conflict - cannot search for both USER and ENDPOINT in same query
+            # For now, prioritize USER entities (emails) over ENDPOINT entities (IPs)
+            logger.warning(
+                "Cannot combine email addresses (USER) and IP addresses (ENDPOINT) in single query. Prioritizing USER entities.")
+            ip_addresses = None
+
+        # Build unified GraphQL query with AND logic
+        query_filters = []
+        query_fields = []
+
+        # Add entity names filter
+        self._add_entity_filters(identifiers, query_fields, query_filters)
+        # Add email addresses filter (USER entities)
+        self._add_email_filter(email_addresses, query_fields, query_filters)
+        # Add IP addresses filter (ENDPOINT entities) - only if no USER criteria
+        self._add_ip_filter(has_user_criteria, ip_addresses, query_fields, query_filters)
+        # Add domain names filter
+        domain_names = self._add_domain_filter(identifiers, query_fields, query_filters)
+
+        # If we have filters to apply, execute unified query
+        if query_filters:
+            # Remove duplicates from fields
+            query_fields = list(set(query_fields))
+            fields_string = '\n'.join(query_fields)
+
+            # Add account information for domain context
+            if domain_names:
+                fields_string += '''
+                    accounts {
+                        ... on ActiveDirectoryAccountDescriptor {
+                            domain
+                            samAccountName
+                        }
+                    }'''
+
+            filters_string = ', '.join(query_filters)
+            limit = identifiers.get("limit", 50)
+
+            query = f'''
+            query {{
+                entities({filters_string}, first: {limit}) {{
+                    nodes {{
+                        entityId
+                        {fields_string}
                     }}
                 }}
-                '''
-                response = self.client.command("api_preempt_proxy_post_graphql", body={"query": query})
-                result = handle_api_response(
-                    response,
-                    operation="api_preempt_proxy_post_graphql",
-                    error_message=f"Failed to resolve IP address '{ip}'",
-                    default_result=None
-                )
-                if self._is_error(result):
-                    return result
+            }}
+            '''
 
-                # Extract entities from GraphQL response structure
-                data = response.get("body", {}).get("data", {})
-                entities = data.get("entities", {}).get("nodes", [])
-                resolved_ids.extend([entity["entityId"] for entity in entities])
+            response = self.client.command("api_preempt_proxy_post_graphql", body={"query": query})
+            result = handle_api_response(
+                response,
+                operation="api_preempt_proxy_post_graphql",
+                error_message="Failed to resolve entities with combined filters",
+                default_result=None
+            )
+            if self._is_error(result):
+                return result
+
+            # Extract entities from GraphQL response structure
+            data = response.get("body", {}).get("data", {})
+            entities = data.get("entities", {}).get("nodes", [])
+            resolved_ids.extend([entity["entityId"] for entity in entities])
 
         # Remove duplicates and return
         return list(set(resolved_ids))
+
+    def _add_domain_filter(self, identifiers, query_fields, query_filters):
+        domain_names = identifiers.get("domain_names")
+        if domain_names and isinstance(domain_names, list):
+            sanitized_domains = [sanitize_input(domain) for domain in domain_names]
+            domains_json = json.dumps(sanitized_domains)
+            query_filters.append(f'domains: {domains_json}')
+            query_fields.extend(['primaryDisplayName', 'secondaryDisplayName'])
+        return domain_names
+
+    def _add_ip_filter(self, has_user_criteria, ip_addresses, query_fields, query_filters):
+        if ip_addresses and isinstance(ip_addresses, list) and not has_user_criteria:
+            sanitized_ips = [sanitize_input(ip) for ip in ip_addresses]
+            ips_json = json.dumps(sanitized_ips)
+            query_filters.append(f'primaryDisplayNames: {ips_json}')
+            query_filters.append('types: [ENDPOINT]')
+            query_fields.append('primaryDisplayName')
+
+    def _add_email_filter(self, email_addresses, query_fields, query_filters):
+        if email_addresses and isinstance(email_addresses, list):
+            sanitized_emails = [sanitize_input(email) for email in email_addresses]
+            emails_json = json.dumps(sanitized_emails)
+            query_filters.append(f'secondaryDisplayNames: {emails_json}')
+            query_filters.append('types: [USER]')
+            query_fields.extend(['primaryDisplayName', 'secondaryDisplayName'])
+
+    def _add_entity_filters(self, identifiers, query_fields, query_filters):
+        entity_names = identifiers.get("entity_names")
+        if entity_names and isinstance(entity_names, list):
+            sanitized_names = [sanitize_input(name) for name in entity_names]
+            names_json = json.dumps(sanitized_names)
+            query_filters.append(f'primaryDisplayNames: {names_json}')
+            query_fields.append('primaryDisplayName')
 
     def _get_entity_details_batch(self, entity_ids: List[str], options: Dict[str, Any]) -> Dict[str, Any]:
         """Get detailed entity information for multiple entities."""
@@ -846,10 +860,10 @@ class IdpModule(BaseModule):
         }
 
     def _synthesize_investigation_response(
-            self,
-            entity_ids: List[str],
-            investigation_results: Dict[str, Any],
-            metadata: Dict[str, Any]
+        self,
+        entity_ids: List[str],
+        investigation_results: Dict[str, Any],
+        metadata: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Synthesize comprehensive investigation response from multiple API results."""
 

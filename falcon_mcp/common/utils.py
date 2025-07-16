@@ -3,6 +3,7 @@ Common utility functions for Falcon MCP Server
 
 This module provides common utility functions for the Falcon MCP server.
 """
+import re
 from typing import Dict, Any, List, Optional
 
 from .errors import is_success_response, _format_error_response
@@ -84,3 +85,22 @@ def extract_first_resource(
         return _format_error_response(not_found_error, operation=operation)
 
     return resources[0]
+
+
+def sanitize_input(input_str: str) -> str:
+    """Sanitize input string.
+
+    Args:
+        input_str: Input string to sanitize
+
+    Returns:
+        Sanitized string with dangerous characters removed
+    """
+    if not isinstance(input_str, str):
+        return str(input_str)
+
+    # Remove backslashes, quotes, and control characters that could be used for injection
+    sanitized = re.sub(r'[\\"\'\n\r\t]', '', input_str)
+
+    # Additional safety: limit length to prevent excessively long inputs
+    return sanitized[:255]
