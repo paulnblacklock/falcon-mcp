@@ -28,6 +28,7 @@ class FalconMCPServer:
         base_url: Optional[str] = None,
         debug: bool = False,
         enabled_modules: Optional[Set[str]] = None,
+        user_agent_comment: Optional[str] = None,
     ):
         """Initialize the Falcon MCP server.
 
@@ -35,10 +36,12 @@ class FalconMCPServer:
             base_url: Falcon API base URL
             debug: Enable debug logging
             enabled_modules: Set of module names to enable (defaults to all modules)
+            user_agent_comment: Additional information to include in the User-Agent comment section
         """
         # Store configuration
         self.base_url = base_url
         self.debug = debug
+        self.user_agent_comment = user_agent_comment
 
         self.enabled_modules = enabled_modules or set(registry.get_module_names())
 
@@ -49,7 +52,8 @@ class FalconMCPServer:
         # Initialize the Falcon client
         self.falcon_client = FalconClient(
             base_url=self.base_url,
-            debug=self.debug
+            debug=self.debug,
+            user_agent_comment=self.user_agent_comment,
         )
 
         # Authenticate with the Falcon API
@@ -255,6 +259,11 @@ def parse_args():
         help="Port to listen on for HTTP transports (default: 8000, env: FALCON_MCP_PORT)"
     )
 
+    parser.add_argument(
+        "--user-agent-comment",
+        default=os.environ.get('FALCON_MCP_USER_AGENT_COMMENT'),
+        help="Additional information to include in the User-Agent comment section (env: FALCON_MCP_USER_AGENT_COMMENT)"
+    )
 
     return parser.parse_args()
 
@@ -272,7 +281,8 @@ def main():
         server = FalconMCPServer(
             base_url=args.base_url,
             debug=args.debug,
-            enabled_modules=set(args.modules)
+            enabled_modules=set(args.modules),
+            user_agent_comment=args.user_agent_comment,
         )
         logger.info("Starting server with %s transport", args.transport)
         server.run(args.transport, host=args.host, port=args.port)
