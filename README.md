@@ -19,8 +19,8 @@
   - [Intel Module](#intel-module)
   - [Hosts Module](#hosts-module)
   - [Spotlight Module](#spotlight-module)
-  - [Cloud Module](#cloud-module)
-  - [IDP Module](#idp-module)
+  - [Cloud Security Module](#cloud-security-module)
+  - [Identity Protection Module](#identity-protection-module)
 - [Installation \& Setup](#installation--setup)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -67,9 +67,9 @@ The Falcon MCP Server supports different modules, each requiring specific API sc
 | **Incidents** | `Incidents:read` | Analyze security incidents and coordinated activities |
 | **Intel** | `Actors (Falcon Intelligence):read`<br>`Indicators (Falcon Intelligence):read`<br>`Reports (Falcon Intelligence):read` | Research threat actors, IOCs, and intelligence reports |
 | **Hosts** | `Hosts:read` | Manage and query host/device information |
-| **Cloud** | `Falcon Container Image:read` | Find and analyze kubernetes containers inventory and container imges vulnerabilities |
+| **Cloud Security** | `Falcon Container Image:read` | Find and analyze kubernetes containers inventory and container imges vulnerabilities |
 | **Spotlight** | `Vulnerabilities:read` | Manage and analyze vulnerability data and security assessments |
-| **IDP** | `Identity Protection GraphQL:read` | Comprehensive entity investigation and identity protection analysis |
+| **Identity Protection** | `Identity Protection GraphQL:read` | Comprehensive entity investigation and identity protection analysis |
 
 ## Available Modules, Tools & Resources
 
@@ -173,13 +173,13 @@ Provides tools for accessing and managing CrowdStrike Spotlight vulnerabilities:
 
 **Use Cases**: Vulnerability management, security assessments, compliance reporting, risk analysis, patch prioritization
 
-### Cloud Module
+### Cloud Security Module
 
 **API Scopes Required**:
 
 - `Falcon Container Image:read`
 
-Provides tools for accessing and analyzing CrowdStrike Cloud resources:
+Provides tools for accessing and analyzing CrowdStrike Cloud Security resources:
 
 - `falcon_search_kubernetes_containers`: Search for containers from CrowdStrike Kubernetes & Containers inventory
 - `falcon_count_kubernetes_containers`: Count for containers by filter criteria from CrowdStrike Kubernetes & Containers inventory
@@ -192,7 +192,7 @@ Provides tools for accessing and analyzing CrowdStrike Cloud resources:
 
 **Use Cases**: Manage kubernetes containers inventory, container images vulnerabilities analysis
 
-### IDP Module
+### Identity Protection Module
 
 **API Scopes Required**: `Identity Protection GraphQL:read`
 
@@ -229,21 +229,29 @@ Provides tools for accessing and managing CrowdStrike Falcon Identity Protection
 
 ### Environment Configuration
 
-Create a `.env` file with your credentials (*alternatively, you can set these as environment variables*):
+Copy the example environment file and configure your credentials:
 
 ```bash
-# Required: CrowdStrike Falcon API Credentials
-FALCON_CLIENT_ID=your-client-id
-FALCON_CLIENT_SECRET=your-client-secret
-FALCON_BASE_URL=https://api.us-2.crowdstrike.com  # Choose your region
-
-# Optional: Server Configuration
-FALCON_MCP_MODULES=detections,incidents,intel,hosts,spotlight,idp  # Modules to enable
-FALCON_MCP_TRANSPORT=stdio                           # Transport method
-FALCON_MCP_DEBUG=false                               # Debug logging
-FALCON_MCP_HOST=127.0.0.1                          # Host for HTTP transports
-FALCON_MCP_PORT=8000                                # Port for HTTP transports
+cp .env.example .env
 ```
+
+Then edit `.env` with your CrowdStrike API credentials:
+
+**Required Configuration:**
+
+- `FALCON_CLIENT_ID`: Your CrowdStrike API client ID
+- `FALCON_CLIENT_SECRET`: Your CrowdStrike API client secret
+- `FALCON_BASE_URL`: Your CrowdStrike API region URL (see options in `.env.example`)
+
+**Optional Configuration:**
+
+- `FALCON_MCP_MODULES`: Comma-separated list of modules to enable (default: all modules)
+- `FALCON_MCP_TRANSPORT`: Transport method - `stdio`, `sse`, or `streamable-http` (default: `stdio`)
+- `FALCON_MCP_DEBUG`: Enable debug logging - `true` or `false` (default: `false`)
+- `FALCON_MCP_HOST`: Host for HTTP transports (default: `127.0.0.1`)
+- `FALCON_MCP_PORT`: Port for HTTP transports (default: `8000`)
+
+*Alternatively, you can set these as environment variables instead of using a `.env` file.*
 
 > **Important**: Ensure your API client has the necessary scopes for the modules you plan to use. You can always update scopes later in the CrowdStrike console.
 
