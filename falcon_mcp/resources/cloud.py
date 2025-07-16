@@ -2,7 +2,7 @@
 Contains Cloud resources.
 """
 
-FQL_DOCUMENTATION = """Falcon Query Language (FQL) - Search Hosts Guide
+FQL_DOCUMENTATION = """Falcon Query Language (FQL)
 
 === BASIC SYNTAX ===
 property_name:[operator]'value'
