@@ -197,6 +197,62 @@ The `TestModules` base class provides:
 
 This approach simplifies test code and ensures consistency across all module tests.
 
+## Contributing Module Changes
+
+When contributing new modules or changes to existing modules, please follow these guidelines:
+
+### Conventional Commits for Modules
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated releases and clear commit history. When contributing module-related changes, use these commit message patterns:
+
+**Adding New Modules:**
+
+```bash
+git commit -m "feat(modules): add [module-name] module for [functionality]"
+# Examples:
+git commit -m "feat(modules): add spotlight module for vulnerability management"
+git commit -m "feat(modules): add intel module for threat intelligence analysis"
+```
+
+**Adding Tools to Existing Modules (Preferred - More Specific Scoping):**
+
+```bash
+git commit -m "feat(modules/[module-name]): add [specific-functionality]"
+# Examples:
+git commit -m "feat(modules/cloud): add list kubernetes clusters tool"
+git commit -m "feat(modules/hosts): add list devices tool"
+git commit -m "feat(modules/detections): add advanced filtering capability"
+```
+
+**Modifying Existing Modules:**
+
+```bash
+git commit -m "feat(modules/[module-name]): enhance [specific-functionality]"
+git commit -m "fix(modules/[module-name]): resolve [specific-issue]"
+# Examples:
+git commit -m "feat(modules/detections): enhance FQL filtering with new operators"
+git commit -m "fix(modules/hosts): resolve authentication error in search function"
+```
+
+**General Module Changes (Less Preferred but Acceptable):**
+
+```bash
+git commit -m "feat(modules): enhance [module-name] with [new-functionality]"
+git commit -m "fix(modules): resolve [issue] in [module-name] module"
+# Examples:
+git commit -m "feat(modules): enhance detections module with FQL filtering"
+git commit -m "fix(modules): resolve authentication error in hosts module"
+```
+
+**Module Tests and Documentation:**
+
+```bash
+git commit -m "test(modules): add comprehensive tests for [module-name] module"
+git commit -m "docs(modules): update [module-name] module documentation"
+```
+
+See the main [CONTRIBUTING.md](CONTRIBUTING.md) guide for complete conventional commits guidelines.
+
 ## Best Practices
 
 ### Error Handling
