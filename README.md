@@ -27,8 +27,8 @@
   - [Identity Protection Module](#identity-protection-module)
 - [Installation \& Setup](#installation--setup)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
   - [Environment Configuration](#environment-configuration)
+  - [Running](#running)
 - [Usage](#usage)
   - [Command Line](#command-line)
   - [Module Configuration](#module-configuration)
@@ -213,41 +213,8 @@ Provides tools for accessing and managing CrowdStrike Falcon Identity Protection
 ### Prerequisites
 
 - Python 3.11 or higher
+- [`uv`](https://docs.astral.sh/uv/)
 - CrowdStrike Falcon API credentials (see above)
-
-### Installation
-
-#### Option 1: Install from PyPI (Recommended)
-
-Install the latest stable version from PyPI:
-
-```bash
-# Optionally create a virtual environment
-python -m venv .venv && source .venv/bin/activate
-
-# Install falcon-mcp from PyPI
-pip install falcon-mcp
-```
-
-#### Option 2: Install from Source (Development)
-
-For development or to get the latest unreleased features:
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/CrowdStrike/falcon-mcp.git
-   cd falcon-mcp
-   ```
-
-2. Install in development mode:
-
-   ```bash
-   # Optionally create a virtual environment
-   python -m venv .venv && source .venv/bin/activate
-
-   pip install -e .
-   ```
 
 ### Environment Configuration
 
@@ -276,6 +243,12 @@ Then edit `.env` with your CrowdStrike API credentials:
 *Alternatively, you can set these as environment variables instead of using a `.env` file.*
 
 > **Important**: Ensure your API client has the necessary scopes for the modules you plan to use. You can always update scopes later in the CrowdStrike console.
+
+### Running
+
+```bash
+uvx falcon-mcp
+```
 
 ## Usage
 
@@ -499,12 +472,25 @@ To deploy the MCP Server as a tool in Amazon Bedrock AgentCore, please refer to 
 
 ### Getting Started for Contributors
 
-To contribute to the Falcon MCP Server, first install the development dependencies:
+1. Clone the repository:
 
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
-```
+   ```bash
+   git clone https://github.com/CrowdStrike/falcon-mcp.git
+   cd falcon-mcp
+   ```
+
+2. Install in development mode:
+
+   ```bash
+   # Install dependencies and create .venv
+   uv sync
+
+   # Activate the venv
+   source .venv/bin/activate
+
+   # Install development dependencies
+   uv pip install -e ".[dev]"
+   ```
 
 > [!IMPORTANT]
 > This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated releases and semantic versioning. Please follow the commit message format outlined in our [Contributing Guide](docs/CONTRIBUTING.md) when submitting changes.
