@@ -1,14 +1,14 @@
 """Base class for E2E tests."""
 
 import asyncio
+import atexit
+import json
 import os
 import threading
 import time
-from typing import Any
 import unittest
+from typing import Any
 from unittest.mock import MagicMock, patch
-import json
-import atexit
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -231,7 +231,7 @@ class BaseE2ETest(unittest.TestCase):
         result = ""
         tools = []
         await self.agent.initialize()
-        async for event in self.agent.astream(prompt, manage_connector=False):
+        async for event in self.agent.stream_events(prompt, manage_connector=False):
             event_type = event.get("event")
             data = event.get("data", {})
             name = event.get("name")

@@ -4,18 +4,18 @@ Spotlight module for Falcon MCP Server
 
 This module provides tools for accessing and managing CrowdStrike Falcon Spotlight vulnerabilities.
 """
-from typing import Dict, List, Optional, Any
 from textwrap import dedent
+from typing import Any, Dict, List, Optional
 
 from mcp.server import FastMCP
 from mcp.server.fastmcp.resources import TextResource
-from pydantic import Field, AnyUrl
+from pydantic import AnyUrl, Field
 
-from falcon_mcp.common.logging import get_logger
 from falcon_mcp.common.errors import handle_api_response
+from falcon_mcp.common.logging import get_logger
 from falcon_mcp.common.utils import prepare_api_parameters
-from falcon_mcp.resources.spotlight import SEARCH_VULNERABILITIES_FQL_DOCUMENTATION
 from falcon_mcp.modules.base import BaseModule
+from falcon_mcp.resources.spotlight import SEARCH_VULNERABILITIES_FQL_DOCUMENTATION
 
 logger = get_logger(__name__)
 
@@ -61,17 +61,17 @@ class SpotlightModule(BaseModule):
             description=dedent("""
                 Sort vulnerabilities using FQL syntax.
 
-                Common sort options include:
-                created_timestamp: When the vulnerability was found
-                closed_timestamp: When the vulnerability was closed
-                updated_timestamp: When the vulnerability was last updated
+                Supported sorting fields:
+                • created_timestamp: When the vulnerability was found
+                • closed_timestamp: When the vulnerability was closed
+                • updated_timestamp: When the vulnerability was last updated
 
                 Sort either asc (ascending) or desc (descending).
                 Format: 'field|direction'
 
-                Examples: 'created_timestamp|desc', 'closed_timestamp|asc', 'updated_timestamp|desc'
+                Examples: 'created_timestamp|desc', 'updated_timestamp|desc', 'closed_timestamp|asc'
             """).strip(),
-            examples={"created_timestamp|desc", "closed_timestamp|asc"}
+            examples={"created_timestamp|desc", "updated_timestamp|desc", "closed_timestamp|asc"}
         ),
         after: Optional[str] = Field(default=None, description="A pagination token used with the limit parameter to manage pagination of results. On your first request, don't provide an after token. On subsequent requests, provide the after token from the previous response to continue from that place in the results."),
         facet: Optional[str] = Field(
