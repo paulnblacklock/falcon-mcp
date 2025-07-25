@@ -49,7 +49,11 @@ class TestIntelModule(TestModules):
 
         # Call search_actors with test parameters
         result = self.module.query_actor_entities(
-            filter="name:'Actor*'", limit=100, offset=0, sort="name.asc", q="test"
+            filter="name:'Actor*'",
+            limit=100,
+            offset=0,
+            sort="name.asc",
+            q="test",
         )
 
         # Verify client command was called correctly
@@ -89,7 +93,10 @@ class TestIntelModule(TestModules):
     def test_search_actors_error(self):
         """Test searching actors with API error."""
         # Setup mock response with error
-        mock_response = {"status_code": 400, "body": {"errors": [{"message": "Invalid query"}]}}
+        mock_response = {
+            "status_code": 400,
+            "body": {"errors": [{"message": "Invalid query"}]},
+        }
         self.mock_client.command.return_value = mock_response
 
         # Call search_actors
@@ -109,8 +116,16 @@ class TestIntelModule(TestModules):
             "status_code": 200,
             "body": {
                 "resources": [
-                    {"id": "indicator1", "indicator": "malicious.com", "type": "domain"},
-                    {"id": "indicator2", "indicator": "192.168.1.1", "type": "ip_address"},
+                    {
+                        "id": "indicator1",
+                        "indicator": "malicious.com",
+                        "type": "domain",
+                    },
+                    {
+                        "id": "indicator2",
+                        "indicator": "192.168.1.1",
+                        "type": "ip_address",
+                    },
                 ]
             },
         }
@@ -166,7 +181,10 @@ class TestIntelModule(TestModules):
     def test_query_indicator_entities_error(self):
         """Test querying indicator entities with API error."""
         # Setup mock response with error
-        mock_response = {"status_code": 400, "body": {"errors": [{"message": "Invalid query"}]}}
+        mock_response = {
+            "status_code": 400,
+            "body": {"errors": [{"message": "Invalid query"}]},
+        }
         self.mock_client.command.return_value = mock_response
 
         # Call query_indicator_entities
@@ -186,8 +204,16 @@ class TestIntelModule(TestModules):
             "status_code": 200,
             "body": {
                 "resources": [
-                    {"id": "report1", "name": "Report 1", "description": "Description 1"},
-                    {"id": "report2", "name": "Report 2", "description": "Description 2"},
+                    {
+                        "id": "report1",
+                        "name": "Report 1",
+                        "description": "Description 1",
+                    },
+                    {
+                        "id": "report2",
+                        "name": "Report 2",
+                        "description": "Description 2",
+                    },
                 ]
             },
         }
@@ -239,7 +265,10 @@ class TestIntelModule(TestModules):
     def test_query_report_entities_error(self):
         """Test querying report entities with API error."""
         # Setup mock response with error
-        mock_response = {"status_code": 400, "body": {"errors": [{"message": "Invalid query"}]}}
+        mock_response = {
+            "status_code": 400,
+            "body": {"errors": [{"message": "Invalid query"}]},
+        }
         self.mock_client.command.return_value = mock_response
 
         # Call query_report_entities

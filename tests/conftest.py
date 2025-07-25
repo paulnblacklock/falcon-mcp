@@ -1,6 +1,7 @@
 """
 Pytest configuration file for the tests.
 """
+
 import pytest
 
 
@@ -9,7 +10,10 @@ def pytest_addoption(parser):
     Add the --run-e2e option to pytest.
     """
     parser.addoption(
-        "--run-e2e", action="store_true", default=False, help="run e2e tests"
+        "--run-e2e",
+        action="store_true",
+        default=False,
+        help="run e2e tests",
     )
 
 

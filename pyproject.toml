@@ -31,13 +31,11 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
     "mypy>=1.0.0",
-    "flake8>=6.0.0",
-    "pylint>=2.15.0",
     "langchain-openai>=0.3.28",
     "mcp-use[search]>=1.3.7",
+    "ruff>=0.12.5",
+    "black>=23.0.0",
 ]
 
 [project.scripts]
@@ -47,16 +45,16 @@ falcon-mcp = "falcon_mcp.server:main"
 line-length = 100
 target-version = ["py311"]
 
-[tool.isort]
-profile = "black"
-line_length = 100
-
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
