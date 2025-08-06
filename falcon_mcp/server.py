@@ -110,16 +110,19 @@ class FalconMCPServer:
         self.server.add_tool(
             self.falcon_check_connectivity,
             name="falcon_check_connectivity",
-            description="Check connectivity to the Falcon API.",
         )
 
         self.server.add_tool(
-            self.get_available_modules,
-            name="falcon_get_available_modules",
-            description="Get information about available modules.",
+            self.list_enabled_modules,
+            name="falcon_list_enabled_modules",
         )
 
-        tool_count = 2  # the tools added above
+        self.server.add_tool(
+            self.list_modules,
+            name="falcon_list_modules",
+        )
+
+        tool_count = 3  # the tools added above
 
         # Register tools from modules
         for module in self.modules.values():
@@ -138,9 +141,7 @@ class FalconMCPServer:
         # Register resources from modules
         for module in self.modules.values():
             # Check if the module has a register_resources method
-            if hasattr(module, "register_resources") and callable(
-                module.register_resources
-            ):
+            if hasattr(module, "register_resources") and callable(module.register_resources):
                 module.register_resources(self.server)
 
         return sum(len(getattr(m, "resources", [])) for m in self.modules.values())
@@ -153,8 +154,19 @@ class FalconMCPServer:
         """
         return {"connected": self.falcon_client.is_authenticated()}
 
-    def get_available_modules(self) -> Dict[str, List[str]]:
-        """Get information about available modules.
+    def list_enabled_modules(self) -> Dict[str, List[str]]:
+        """Lists enabled modules in the falcon-mcp server.
+
+        These modules are determined by the --modules flag when starting the server.
+        If no modules are specified, all available modules are enabled.
+
+        Returns:
+            Dict[str, List[str]]: Enabled modules
+        """
+        return {"modules": list(self.modules.keys())}
+
+    def list_modules(self) -> Dict[str, List[str]]:
+        """Lists all available modules in the falcon-mcp server.
 
         Returns:
             Dict[str, List[str]]: Available modules
