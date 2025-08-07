@@ -24,6 +24,7 @@
   - [Hosts Module](#hosts-module)
   - [Spotlight Module](#spotlight-module)
   - [Cloud Security Module](#cloud-security-module)
+  - [Sensor Usage Module](#sensor-usage-module)
   - [Identity Protection Module](#identity-protection-module)
 - [Installation \& Setup](#installation--setup)
   - [Prerequisites](#prerequisites)
@@ -72,14 +73,15 @@ The Falcon MCP Server supports different modules, each requiring specific API sc
 
 | Module | Required API Scopes | Purpose |
 |--------|-------------------|---------|
-| **Core** | *No additional scopes* | Basic connectivity and system information |
-| **Detections** | `Alerts:read` | Find and analyze detections to understand malicious activity |
-| **Incidents** | `Incidents:read` | Analyze security incidents and coordinated activities |
-| **Intel** | `Actors (Falcon Intelligence):read`<br>`Indicators (Falcon Intelligence):read`<br>`Reports (Falcon Intelligence):read` | Research threat actors, IOCs, and intelligence reports |
-| **Hosts** | `Hosts:read` | Manage and query host/device information |
-| **Cloud Security** | `Falcon Container Image:read` | Find and analyze kubernetes containers inventory and container imges vulnerabilities |
-| **Spotlight** | `Vulnerabilities:read` | Manage and analyze vulnerability data and security assessments |
-| **Identity Protection** | `Identity Protection Entities:read`<br>`Identity Protection Timeline:read`<br>`Identity Protection Detections:read` <br> `Identity Protection Assessment:read` | Comprehensive entity investigation and identity protection analysis |
+| **Core**                | _No additional scopes_                                                                                                                                         | Basic connectivity and system information                                            |
+| **Detections**          | `Alerts:read`                                                                                                                                                  | Find and analyze detections to understand malicious activity                         |
+| **Incidents**           | `Incidents:read`                                                                                                                                               | Analyze security incidents and coordinated activities                                |
+| **Intel**               | `Actors (Falcon Intelligence):read`<br>`Indicators (Falcon Intelligence):read`<br>`Reports (Falcon Intelligence):read`                                         | Research threat actors, IOCs, and intelligence reports                               |
+| **Hosts**               | `Hosts:read`                                                                                                                                                   | Manage and query host/device information                                             |
+| **Cloud Security**      | `Falcon Container Image:read`                                                                                                                                  | Find and analyze kubernetes containers inventory and container imges vulnerabilities |
+| **Sensor Usage**        | `Sensor Usage:read`                                                                                                                                            | Access and analyze sensor usage data                                                 |
+| **Spotlight**           | `Vulnerabilities:read`                                                                                                                                         | Manage and analyze vulnerability data and security assessments                       |
+| **Identity Protection** | `Identity Protection Entities:read`<br>`Identity Protection Timeline:read`<br>`Identity Protection Detections:read` <br> `Identity Protection Assessment:read` | Comprehensive entity investigation and identity protection analysis                  |
 
 ## Available Modules, Tools & Resources
 
@@ -90,7 +92,7 @@ The Falcon MCP Server supports different modules, each requiring specific API sc
 
 ### Core Functionality (Built into Server)
 
-**API Scopes**: *None required beyond basic API access*
+**API Scopes**: _None required beyond basic API access_
 
 The server provides core tools for interacting with the Falcon API:
 
@@ -204,13 +206,27 @@ Provides tools for accessing and analyzing CrowdStrike Cloud Security resources:
 
 **Use Cases**: Manage kubernetes containers inventory, container images vulnerabilities analysis
 
+### Sensor Usage Module
+
+**API Scopes Required**: `Sensor Usage:read`
+
+Provides tools for accessing and analyzing CrowdStrike Falcon sensor usage data:
+
+- `falcon_search_sensor_usage`: Search for weekly sensor usage data in your CrowdStrike environment
+
+**Resources**:
+
+- `falcon://sensor-usage/weekly/fql-guide`: Comprehensive FQL documentation and examples for sensor usage searches
+
+**Use Cases**: Sensor deployment monitoring, license utilization analysis, sensor health tracking
+
 ### Identity Protection Module
 
 **API Scopes Required**: `Identity Protection GraphQL:write`
 
 Provides tools for accessing and managing CrowdStrike Falcon Identity Protection capabilities:
 
-- `idp_investigate_entity`:  Entity investigation tool for analyzing users, endpoints, and other entities with support for timeline analysis, relationship mapping, and risk assessment
+- `idp_investigate_entity`: Entity investigation tool for analyzing users, endpoints, and other entities with support for timeline analysis, relationship mapping, and risk assessment
 
 **Use Cases**: Entity investigation, identity protection analysis, user behavior analysis, endpoint security assessment, relationship mapping, risk assessment
 
@@ -246,7 +262,7 @@ Then edit `.env` with your CrowdStrike API credentials:
 - `FALCON_MCP_HOST`: Host for HTTP transports (default: `127.0.0.1`)
 - `FALCON_MCP_PORT`: Port for HTTP transports (default: `8000`)
 
-*Alternatively, you can set these as environment variables instead of using a `.env` file.*
+_Alternatively, you can set these as environment variables instead of using a `.env` file._
 
 > **Important**: Ensure your API client has the necessary scopes for the modules you plan to use. You can always update scopes later in the CrowdStrike console.
 
@@ -459,9 +475,11 @@ You can integrate the Falcon MCP server with your editor or AI assistant. Here a
     "falcon-mcp": {
       "command": "uvx",
       "args": [
-        "--env-file", "/path/to/.env",
+        "--env-file",
+        "/path/to/.env",
         "falcon-mcp",
-        "--modules", "detections,incidents,intel"
+        "--modules",
+        "detections,incidents,intel"
       ]
     }
   }
@@ -494,8 +512,11 @@ You can integrate the Falcon MCP server with your editor or AI assistant. Here a
     "falcon-mcp-docker": {
       "command": "docker",
       "args": [
-        "run", "-i", "--rm",
-        "--env-file", "/full/path/to/.env",
+        "run",
+        "-i",
+        "--rm",
+        "--env-file",
+        "/full/path/to/.env",
         "quay.io/crowdstrike/falcon-mcp:latest"
       ]
     }
